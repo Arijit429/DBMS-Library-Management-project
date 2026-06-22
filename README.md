@@ -186,15 +186,4 @@ DBMS-Library-Management-project/
 
 ---
 
-## 📄 Submission Deliverables
-
-- [x] Project Report (PDF)
-- [x] Relational Schema
-- [x] SQL Script File (`database/schema.sql`)
-- [x] Sample Dataset (151+ records)
-- [x] Source Code (frontend + backend)
-- [ ] Presentation Slides
-
----
-
 *Submitted for DBMS Capstone Project | Course 203MDS | PW Institute of Innovation*
