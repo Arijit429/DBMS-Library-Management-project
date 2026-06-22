@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Library System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  /* dark app palette */
+  --bg:#080808; --bg1:#0F0F0F; --bg2:#151515; --bg3:#1C1C1C;
+  --br:rgba(255,255,255,.07); --br2:rgba(255,255,255,.13); --br3:rgba(255,255,255,.3);
+  --t1:#F0EFE9; --t2:#888880; --t3:#444;
+  --white:#fff;
+  --G:#4ADE80; --Gbg:rgba(74,222,128,.1);
+  --R:#F87171; --Rbg:rgba(248,113,113,.1);
+  --A:#FBBF24; --Abg:rgba(251,191,36,.1);
+  --B:#60A5FA; --Bbg:rgba(96,165,250,.1);
+  --P:#A78BFA; --Pbg:rgba(167,139,250,.1);
+  --T:#2DD4BF; --Tbg:rgba(45,212,191,.1);
+  /* light login palette */
+  --lbg:#F0F4F8; --lprimary:#2563EB; --lhover:#1D4ED8;
+  --ltext:#111827; --lmuted:#6B7280; --lborder:#E5E7EB;
+  --sw:240px;
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+
+/* ─── ANIMATIONS ─────────────────────────────── */
+@keyframes bgBreath{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes floatUp{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+@keyframes cardPop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes countUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* ════════════════════════════════════════════
+   LOGIN  —  light, two-panel, matches screenshot
+════════════════════════════════════════════ */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--lbg);padding:20px;
+}
+
+.lcard{
+  display:flex;width:940px;max-width:100%;min-height:600px;
+  background:#fff;border-radius:28px;overflow:hidden;
+  box-shadow:0 28px 80px rgba(0,0,0,.14);
+}
+
+/* LEFT ART PANEL */
+.lart{
+  flex:1.15;
+  background:linear-gradient(160deg,#0f1f3d 0%,#1a4f8a 45%,#0d3464 100%);
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:48px 40px;overflow:hidden;
+}
+.lart::before{
+  content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(251,191,36,.12) 0%,transparent 70%);
+  top:-80px;right:-80px;animation:glow 4s ease-in-out infinite;
+}
+.lart::after{
+  content:'';position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(96,165,250,.1) 0%,transparent 70%);
+  bottom:-60px;left:-60px;
+}
+
+.lart-inner{text-align:center;color:#fff;position:relative;z-index:1}
+
+/* SVG Book Tree */
+.book-tree{width:240px;height:240px;margin:0 auto 28px;filter:drop-shadow(0 12px 32px rgba(0,0,0,.4))}
+
+.lart-inner h2{
+  font-size:26px;font-weight:800;line-height:1.3;
+  letter-spacing:-.3px;margin-bottom:12px;
+}
+.lart-inner p{font-size:13.5px;color:rgba(255,255,255,.68);line-height:1.7;max-width:260px;margin:0 auto}
+
+.lart-dots{display:flex;justify-content:center;gap:6px;margin-top:28px}
+.lart-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}
+.lart-dots span:first-child{background:#fff;width:22px;border-radius:3px}
+
+/* RIGHT FORM PANEL */
+.lform-panel{
+  flex:1;display:flex;flex-direction:column;justify-content:center;padding:52px 48px;
+}
+
+.lbrand{display:flex;align-items:center;gap:10px;margin-bottom:38px}
+.lbrand-icon{
+  width:36px;height:36px;background:#EFF6FF;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.lbrand span{font-size:15px;font-weight:700;color:var(--ltext)}
+
+.lform-panel h1{font-size:26px;font-weight:800;color:var(--ltext);margin-bottom:5px;letter-spacing:-.4px}
+.lsubtitle{font-size:14px;color:var(--lmuted);margin-bottom:26px}
+
+/* Role toggle (subtle) */
+.lrole{display:flex;gap:10px;margin-bottom:24px}
+.lrole-btn{
+  flex:1;padding:9px;border:1.5px solid var(--lborder);border-radius:10px;
+  background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;color:var(--lmuted);transition:all .18s;
+}
+.lrole-btn.active{border-color:var(--lprimary);color:var(--lprimary);background:#EFF6FF}
+
+/* Social buttons */
+.social-row{display:flex;gap:12px;margin-bottom:22px}
+.social-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 14px;border:1.5px solid var(--lborder);border-radius:11px;
+  background:#fff;font-size:13.5px;font-weight:500;color:var(--ltext);
+  cursor:pointer;transition:all .16s;font-family:'Inter',sans-serif;
+}
+.social-btn:hover{border-color:var(--lprimary);background:#EFF6FF}
+
+/* Divider */
+.lor{display:flex;align-items:center;gap:12px;margin-bottom:22px;font-size:13px;color:var(--lmuted)}
+.lor::before,.lor::after{content:'';flex:1;height:1px;background:var(--lborder)}
+
+/* Field */
+.lfield{margin-bottom:15px}
+.lfield label{display:block;font-size:13px;font-weight:600;color:var(--ltext);margin-bottom:6px}
+.lfield-wrap{position:relative}
+.lfield-wrap input{
+  width:100%;padding:12px 14px;border:1.5px solid var(--lborder);border-radius:11px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--ltext);background:#FAFAFA;
+  outline:none;transition:border-color .16s,background .16s;
+}
+.lfield-wrap input:focus{border-color:var(--lprimary);background:#fff}
+.lfield-wrap input::placeholder{color:#C0C0C0}
+.lfield-wrap.haspwd input{padding-right:44px}
+.leye{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:var(--lmuted);
+  display:flex;align-items:center;padding:4px;
+}
+
+/* Options row */
+.lopts{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.lrem{display:flex;align-items:center;gap:7px;cursor:pointer}
+.lrem input{accent-color:var(--lprimary);width:15px;height:15px}
+.lrem span{font-size:13px;color:var(--lmuted)}
+.lforg{font-size:13px;color:var(--lprimary);font-weight:500;text-decoration:none;cursor:pointer}
+.lforg:hover{text-decoration:underline}
+
+/* Login CTA */
+.lsubmit{
+  width:100%;padding:13px;background:var(--lprimary);color:#fff;
+  border:none;border-radius:11px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:background .16s,transform .1s;margin-bottom:22px;
+  position:relative;overflow:hidden;
+}
+.lsubmit::after{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+  transition:left .5s;
+}
+.lsubmit:hover{background:var(--lhover)}
+.lsubmit:hover::after{left:100%}
+.lsubmit:active{transform:scale(.99)}
+
+.lfoot{text-align:center;font-size:13px;color:var(--lmuted)}
+.lfoot a{color:var(--lprimary);font-weight:600;text-decoration:none}
+.lfoot a:hover{text-decoration:underline}
+
+/* ════════════════════════════════════════════
+   STAFF APP  —  dark premium
+════════════════════════════════════════════ */
+#staff-app{display:none}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;top:0;left:0;width:var(--sw);height:100vh;
+  background:var(--bg1);border-right:1px solid var(--br);
+  display:flex;flex-direction:column;z-index:100;
+}
+.sb-logo{
+  padding:18px 16px 16px;border-bottom:1px solid var(--br);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo-icon{
+  width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);
+  border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+}
+.sb-logo-name{font-size:13.5px;font-weight:700;color:var(--white);line-height:1.2}
+.sb-logo-name small{display:block;font-size:10px;font-weight:400;color:var(--t2);margin-top:1px}
+
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.sb-group{font-size:9.5px;font-weight:600;color:var(--t3);letter-spacing:1.3px;
+  text-transform:uppercase;padding:0 8px;margin:16px 0 5px}
+.sb-group:first-child{margin-top:4px}
+
+.ni{
+  display:flex;align-items:center;gap:9px;padding:8.5px 10px;
+  border-radius:9px;cursor:pointer;color:var(--t2);font-size:13px;font-weight:500;
+  transition:all .15s;margin-bottom:1px;user-select:none;
+}
+.ni:hover{color:var(--t1);background:rgba(255,255,255,.05)}
+.ni.on{color:var(--white);background:rgba(255,255,255,.1);font-weight:600}
+.ni-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+
+.sb-foot{padding:10px;border-top:1px solid var(--br)}
+.uc{
+  display:flex;align-items:center;gap:9px;padding:9px 10px;
+  border-radius:10px;cursor:pointer;transition:background .15s;
+}
+.uc:hover{background:rgba(255,255,255,.06)}
+.uc-av{
+  width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--white);flex-shrink:0;
+}
+.uc-name{font-size:12.5px;font-weight:600;color:var(--t1)}
+.uc-role{font-size:10px;color:var(--t2);margin-top:1px}
+
+/* Main area */
+.smain{margin-left:var(--sw);min-height:100vh;display:flex;flex-direction:column}
+
+.sbar{
+  height:58px;background:var(--bg1);border-bottom:1px solid var(--br);
+  padding:0 26px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.sbar-l h2{font-size:18px;font-weight:800;letter-spacing:-.4px}
+.sbar-l p{font-size:11.5px;color:var(--t2);margin-top:1px}
+.sbar-r{display:flex;gap:10px;align-items:center}
+
+.sc{padding:24px}
+
+/* Pages */
+.spage{display:none}
+.spage.on{display:block;animation:pageIn .38s cubic-bezier(.16,1,.3,1) forwards}
+
+/* ─── STATS ────────────────── */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:22px}
+.scard{
+  background:var(--bg2);border:1px solid var(--br);border-radius:14px;
+  padding:22px 20px;transition:border-color .2s,transform .2s;
+}
+.scard:hover{border-color:var(--br2);transform:translateY(-2px)}
+.sc-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;
+  letter-spacing:1px;display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.sc-val{font-size:40px;font-weight:900;color:var(--white);
+  font-family:'JetBrains Mono',monospace;letter-spacing:-2px;line-height:1;
+  animation:countUp .6s cubic-bezier(.16,1,.3,1) both}
+
+/* ─── QUICK ACTIONS ────────── */
+.qa-grid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.qa{
+  flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--br);
+  border-radius:13px;padding:18px 16px;cursor:pointer;
+  display:flex;align-items:center;gap:12px;
+  transition:border-color .2s,transform .2s;
+  font-family:'Inter',sans-serif;
+}
+.qa:hover{border-color:var(--br2);transform:translateY(-3px)}
+.qa-ico{font-size:22px}
+.qa-ttl{font-size:13.5px;font-weight:600;color:var(--t1)}
+.qa-sub{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* ─── DARK CARD ────────────── */
+.dc{background:var(--bg2);border:1px solid var(--br);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.dc-hd{padding:14px 20px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between}
+.dc-hd h3{font-size:14px;font-weight:700;color:var(--white)}
+
+/* ─── FILTER TABS ──────────── */
+.ftabs{display:flex;gap:8px;padding:14px 20px;overflow-x:auto;border-bottom:1px solid var(--br)}
+.ft{
+  padding:5px 15px;border-radius:100px;font-size:10.5px;font-weight:700;
+  letter-spacing:.7px;text-transform:uppercase;cursor:pointer;
+  background:none;border:1px solid var(--br2);color:var(--t2);
+  white-space:nowrap;flex-shrink:0;font-family:'Inter',sans-serif;transition:all .18s;
+}
+.ft:hover{color:var(--t1);border-color:rgba(255,255,255,.25)}
+.ft.on{background:var(--white);color:#000;border-color:var(--white)}
+
+/* ─── SEARCH ───────────────── */
+.dsearch{
+  display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--br);
+  border-radius:9px;padding:7px 12px;transition:border-color .18s;
+}
+.dsearch:focus-within{border-color:var(--br2)}
+.dsearch input{background:none;border:none;outline:none;font-size:13px;color:var(--t1);font-family:'Inter',sans-serif;width:200px}
+.dsearch input::placeholder{color:var(--t3)}
+
+/* ─── BOOKS GRID ───────────── */
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:15px;padding:20px}
+
+.bk{
+  border-radius:13px;overflow:hidden;cursor:pointer;
+  border:1px solid var(--br);background:var(--bg2);
+  animation:cardPop .4s cubic-bezier(.16,1,.3,1) both;
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,border-color .2s;
+}
+.bk:hover{transform:translateY(-7px) scale(1.02);box-shadow:0 22px 52px rgba(0,0,0,.55);border-color:var(--br2)}
+
+.bk-cov{height:158px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bk-cov-letter{font-size:52px;font-weight:900;color:rgba(255,255,255,.12);font-family:'JetBrains Mono',monospace;user-select:none}
+.bk-avail{
+  position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:700;
+  padding:3px 9px;border-radius:100px;backdrop-filter:blur(8px);
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);
+}
+.bk-avail.ok{color:var(--G)}
+.bk-avail.out{color:var(--R)}
+
+.bk-info{padding:12px}
+.bk-title{
+  font-size:12px;font-weight:600;color:var(--t1);line-height:1.35;margin-bottom:3px;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.bk-author{font-size:11px;color:var(--t2);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-cat{font-size:9.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* ─── MEMBERS GRID ─────────── */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;padding:20px}
+.mc{
+  background:var(--bg2);border:1px solid var(--br);border-radius:13px;padding:18px;
+  animation:cardPop .4s cubic-bezier(.16,1,.3,1) both;transition:border-color .2s,transform .2s;
+}
+.mc:hover{border-color:var(--br2);transform:translateY(-2px)}
+.mc-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--white);margin-bottom:12px}
+.mc-name{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-email{font-size:11px;color:var(--t2);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+
+/* ─── DARK TABLE ───────────── */
+.dtw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--br)}
+th{padding:11px 20px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--t2);white-space:nowrap}
+td{padding:13px 20px;font-size:13px;color:var(--t1);border-bottom:1px solid var(--br)}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ─── BADGES ────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.bg{background:var(--Gbg);color:var(--G)}
+.br{background:var(--Rbg);color:var(--R)}
+.ba{background:var(--Abg);color:var(--A)}
+.bb{background:var(--Bbg);color:var(--B)}
+.bp{background:var(--Pbg);color:var(--P)}
+.bt{background:var(--Tbg);color:var(--T)}
+
+/* ─── BUTTONS ───────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border-radius:9px;border:none;font-size:12.5px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+}
+.btn-ghost{background:rgba(255,255,255,.08);border:1px solid var(--br2);color:var(--t1)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.btn-green{background:var(--Gbg);color:var(--G);border:1px solid rgba(74,222,128,.22)}
+.btn-green:hover{background:rgba(74,222,128,.18)}
+.btn-solid{background:var(--white);color:#000}
+.btn-solid:hover{opacity:.9}
+
+/* ─── FORM ──────────────────── */
+.dform{padding:20px}
+.fg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.9px}
+.fg select,.fg input{
+  background:var(--bg);border:1px solid var(--br);border-radius:9px;padding:10px 12px;
+  color:var(--t1);font-size:13px;font-family:'Inter',sans-serif;outline:none;
+  transition:border-color .18s;appearance:none;
+}
+.fg select:focus,.fg input:focus{border-color:var(--br3)}
+.dform-foot{padding:0 20px 20px;display:flex;gap:10px}
+
+/* ─── SKELETON ──────────────── */
+.skel{
+  background:linear-gradient(90deg,#121212 25%,#1E1E1E 50%,#121212 75%);
+  background-size:800px 100%;animation:shimmer 1.5s infinite;border-radius:5px;
+}
+
+/* ─── EMPTY ─────────────────── */
+.empty{padding:52px 20px;text-align:center;color:var(--t2);font-size:14px}
+.empty-ico{font-size:38px;margin-bottom:14px;opacity:.45}
+.empty p{margin-top:6px;font-size:12px;color:var(--t3)}
+
+/* ─── UTILS ─────────────────── */
+.tb{font-weight:600}
+.td{color:var(--t2);font-size:12px}
+.tm{font-family:'JetBrains Mono',monospace;font-size:12px}
+.spinner{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.15);border-top-color:var(--white);animation:spin .7s linear infinite;display:inline-block}
+
+/* ════════════════════════════════════════════
+   MEMBER PORTAL  —  full-screen mobile-app style
+════════════════════════════════════════════ */
+#member-app{
+  display:none;height:100vh;flex-direction:column;
+  background:var(--bg);max-width:500px;margin:0 auto;
+  border-left:1px solid var(--br);border-right:1px solid var(--br);
+}
+
+.m-topbar{
+  padding:20px 20px 15px;border-bottom:1px solid var(--br);
+  background:var(--bg1);flex-shrink:0;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.m-topbar h2{font-size:26px;font-weight:900;letter-spacing:-.6px;line-height:1}
+.m-topbar p{font-size:12px;color:var(--t2);margin-top:3px}
+.m-tbar-acts{display:flex;gap:8px;align-items:center;margin-top:4px}
+
+.ibtn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.07);border:1px solid var(--br);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--t2);transition:all .15s;font-size:15px;
+}
+.ibtn:hover{background:rgba(255,255,255,.12);color:var(--t1)}
+
+.m-pages{flex:1;overflow-y:auto;overflow-x:hidden}
+
+.mpage{display:none}
+.mpage.on{display:block;animation:pageIn .35s cubic-bezier(.16,1,.3,1) forwards}
+
+/* member filter tabs */
+.mftabs{display:flex;gap:8px;padding:13px 16px;overflow-x:auto}
+.mft{
+  padding:5px 14px;border-radius:100px;font-size:10px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;
+  background:none;border:1px solid var(--br2);color:var(--t2);
+  white-space:nowrap;flex-shrink:0;font-family:'Inter',sans-serif;transition:all .18s;
+}
+.mft:hover{color:var(--t1)}
+.mft.on{background:var(--white);color:#000;border-color:var(--white)}
+
+/* borrow card */
+.brow-card{
+  margin:0 14px 10px;background:var(--bg2);border:1px solid var(--br);
+  border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start;
+  animation:cardPop .35s cubic-bezier(.16,1,.3,1) both;transition:border-color .15s;
+}
+.brow-card:hover{border-color:var(--br2)}
+.brow-cov{width:52px;height:72px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.brow-info{flex:1;min-width:0}
+.brow-title{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.3}
+.brow-cat{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.brow-dates{font-size:11px;color:var(--t2);line-height:1.8}
+
+/* fine card */
+.fine-card{
+  margin:0 14px 10px;background:var(--bg2);border:1px solid var(--br);
+  border-radius:14px;padding:16px;animation:cardPop .35s both;
+}
+.fine-amt{font-size:28px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--A);margin-bottom:5px}
+.fine-book{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.fine-rsn{font-size:10.5px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+
+/* profile */
+.pcard{
+  margin:16px;background:var(--bg2);border:1px solid var(--br);
+  border-radius:16px;padding:26px;text-align:center;
+}
+.pcard-av{
+  width:74px;height:74px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:900;color:var(--white);
+  margin:0 auto 14px;
+}
+.pcard-name{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px}
+.pcard-email{font-size:13px;color:var(--t2);margin-bottom:4px}
+.pcard-badge{margin-bottom:14px}
+.pcard-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:13px;text-align:left;
+  border-top:1px solid var(--br);padding-top:16px;margin-top:4px;
+}
+.pg-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.pg-val{font-size:13.5px;font-weight:500;color:var(--t1)}
+
+/* bottom nav */
+.bot-nav{border-top:1px solid var(--br);background:var(--bg1);display:flex;flex-shrink:0}
+.bni{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:12px 4px 18px;cursor:pointer;color:var(--t2);font-size:10px;font-weight:600;
+  letter-spacing:.4px;transition:color .15s;gap:5px;user-select:none;
+}
+.bni.on{color:var(--white)}
+.bni-ico{font-size:22px;line-height:1}
+
+/* ─── TOAST ─────────────────── */
+#toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--bg2);border:1px solid var(--br2);
+  border-radius:13px;padding:13px 18px;font-size:13px;font-weight:500;
+  opacity:0;pointer-events:none;z-index:9999;max-width:320px;
+  box-shadow:0 10px 40px rgba(0,0,0,.6);
+  transform:translateY(16px) scale(.95);
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+}
+#toast.show{opacity:1;pointer-events:auto;transform:none}
+#toast.s{border-left:3px solid var(--G)}
+#toast.e{border-left:3px solid var(--R)}
+
+@media(max-width:700px){.lart{display:none}.lform-panel{padding:36px 28px}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOGIN PAGE ════════════════ -->
+<div id="login-screen">
+  <div class="lcard">
+
+    <!-- Left art panel -->
+    <div class="lart">
+      <div class="lart-inner">
+
+        <!-- Detailed book-tree SVG art -->
+        <svg class="book-tree" viewBox="0 0 260 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="grd1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(251,191,36,.25)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+            <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+          </defs>
+          <!-- ambient glow -->
+          <ellipse cx="130" cy="130" rx="110" ry="100" fill="url(#grd1)"/>
+          <!-- Trunk -->
+          <path d="M130 268 Q128 230 130 170" stroke="rgba(255,255,255,.35)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M130 268 Q128 230 130 170" stroke="rgba(251,191,36,.08)" stroke-width="10" stroke-linecap="round"/>
+          <!-- Branches left -->
+          <path d="M130 218 Q105 200 78 188" stroke="rgba(255,255,255,.28)" stroke-width="7" stroke-linecap="round"/>
+          <path d="M130 200 Q100 178 68 164" stroke="rgba(255,255,255,.24)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M130 182 Q105 162 78 148" stroke="rgba(255,255,255,.2)"  stroke-width="5" stroke-linecap="round"/>
+          <path d="M130 165 Q110 145 85 132" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+          <!-- Branches right -->
+          <path d="M130 213 Q155 196 182 185" stroke="rgba(255,255,255,.28)" stroke-width="7" stroke-linecap="round"/>
+          <path d="M130 196 Q160 174 192 161" stroke="rgba(255,255,255,.24)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M130 178 Q155 158 182 146" stroke="rgba(255,255,255,.2)"  stroke-width="5" stroke-linecap="round"/>
+          <path d="M130 162 Q152 144 175 133" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+          <!-- Center top -->
+          <path d="M130 168 Q130 140 130 108" stroke="rgba(255,255,255,.25)" stroke-width="5" stroke-linecap="round"/>
+
+          <!-- Books — warm amber / cream tones -->
+          <!-- Center cluster top -->
+          <rect x="116" y="88"  width="12" height="19" rx="2" fill="rgba(251,191,36,.8)"/>
+          <rect x="129" y="83"  width="14" height="24" rx="2" fill="rgba(255,255,255,.6)"/>
+          <rect x="144" y="89"  width="11" height="18" rx="2" fill="rgba(251,191,36,.65)"/>
+          <rect x="120" y="79"  width="10" height="12" rx="2" fill="rgba(255,255,255,.3)"/>
+
+          <!-- Left cluster 1 -->
+          <rect x="60"  y="170" width="11" height="17" rx="2" fill="rgba(251,191,36,.75)"/>
+          <rect x="72"  y="167" width="13" height="21" rx="2" fill="rgba(255,255,255,.55)"/>
+          <rect x="86"  y="171" width="10" height="16" rx="2" fill="rgba(251,191,36,.6)"/>
+
+          <!-- Left cluster 2 -->
+          <rect x="50"  y="148" width="10" height="16" rx="2" fill="rgba(255,255,255,.45)"/>
+          <rect x="61"  y="144" width="12" height="20" rx="2" fill="rgba(251,191,36,.65)"/>
+          <rect x="74"  y="149" width="9"  height="15" rx="2" fill="rgba(255,255,255,.4)"/>
+
+          <!-- Left cluster 3 -->
+          <rect x="65"  y="128" width="9"  height="14" rx="2" fill="rgba(251,191,36,.5)"/>
+          <rect x="75"  y="125" width="11" height="18" rx="2" fill="rgba(255,255,255,.4)"/>
+
+          <!-- Right cluster 1 -->
+          <rect x="174" y="168" width="11" height="17" rx="2" fill="rgba(251,191,36,.75)"/>
+          <rect x="186" y="165" width="13" height="21" rx="2" fill="rgba(255,255,255,.55)"/>
+          <rect x="200" y="169" width="10" height="16" rx="2" fill="rgba(251,191,36,.6)"/>
+
+          <!-- Right cluster 2 -->
+          <rect x="183" y="145" width="10" height="16" rx="2" fill="rgba(255,255,255,.45)"/>
+          <rect x="194" y="141" width="12" height="20" rx="2" fill="rgba(251,191,36,.65)"/>
+          <rect x="207" y="146" width="9"  height="15" rx="2" fill="rgba(255,255,255,.4)"/>
+
+          <!-- Right cluster 3 -->
+          <rect x="170" y="128" width="9"  height="14" rx="2" fill="rgba(251,191,36,.5)"/>
+          <rect x="180" y="125" width="11" height="18" rx="2" fill="rgba(255,255,255,.4)"/>
+
+          <!-- Ground stacks -->
+          <rect x="84"  y="260" width="92" height="9"  rx="3" fill="rgba(255,255,255,.14)"/>
+          <rect x="92"  y="252" width="76" height="9"  rx="3" fill="rgba(255,255,255,.18)"/>
+          <rect x="100" y="244" width="60" height="9"  rx="3" fill="rgba(255,255,255,.22)"/>
+          <rect x="108" y="236" width="44" height="9"  rx="3" fill="rgba(255,255,255,.26)"/>
+        </svg>
+
+        <h2>Knowledge is the<br/>Key to Freedom</h2>
+        <p>Access thousands of books, manage members, and track every borrow in one place.</p>
+        <div class="lart-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="lform-panel">
+      <div class="lbrand">
+        <div class="lbrand-icon">📚</div>
+        <span>Library System</span>
+      </div>
+
+      <h1>Login to your Account</h1>
+      <p class="lsubtitle">Welcome back! Select your access type:</p>
+
+      <div class="lrole">
+        <button class="lrole-btn active" id="rb-staff"  onclick="setRole('staff',this)">🏛️ Staff</button>
+        <button class="lrole-btn"        id="rb-member" onclick="setRole('member',this)">👤 Member</button>
+      </div>
+
+      <div class="social-row">
+        <button class="social-btn" onclick="toast('Social login coming soon','e')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook
+        </button>
+        <button class="social-btn" onclick="toast('Social login coming soon','e')">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google
+        </button>
+      </div>
+
+      <div class="lor">or continue with email</div>
+
+      <div class="lfield">
+        <label>Email or Username</label>
+        <div class="lfield-wrap">
+          <input type="email" id="l-email" placeholder="Enter your email or username" autocomplete="email"/>
+        </div>
+      </div>
+
+      <div class="lfield">
+        <label>Password</label>
+        <div class="lfield-wrap haspwd">
+          <input type="password" id="l-pwd" placeholder="••••••••••" autocomplete="current-password"/>
+          <button class="leye" onclick="toggleEye()" type="button">
+            <svg id="eye-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="lopts">
+        <label class="lrem"><input type="checkbox" checked/><span>Remember Me</span></label>
+        <a class="lforg" href="#">Forgot Password?</a>
+      </div>
+
+      <button class="lsubmit" id="l-btn" onclick="doLogin()">Login</button>
+
+      <p class="lfoot">New on our platform? <a href="#">Create an account</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ STAFF APP ════════════════ -->
+<div id="staff-app">
+  <nav class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">📚</div>
+      <div class="sb-logo-name">LibraryMS <small>PW Institute</small></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-group">Overview</div>
+      <div class="ni on" onclick="showSP('dashboard',this)"><span class="ni-ico">📊</span>Dashboard</div>
+      <div class="sb-group">Catalog</div>
+      <div class="ni" onclick="showSP('books',this)"><span class="ni-ico">📖</span>Books</div>
+      <div class="ni" onclick="showSP('members',this)"><span class="ni-ico">👥</span>Members</div>
+      <div class="sb-group">Transactions</div>
+      <div class="ni" onclick="showSP('borrows',this)"><span class="ni-ico">🔄</span>Active Borrows</div>
+      <div class="ni" onclick="showSP('issue',this)"><span class="ni-ico">➕</span>Issue Book</div>
+      <div class="ni" onclick="showSP('return',this)"><span class="ni-ico">↩️</span>Return Book</div>
+      <div class="sb-group">Reports</div>
+      <div class="ni" onclick="showSP('fines',this)"><span class="ni-ico">💰</span>Fines</div>
+      <div class="ni" onclick="showSP('overdue',this)"><span class="ni-ico">⚠️</span>Overdue</div>
+    </div>
+    <div class="sb-foot">
+      <div class="uc" onclick="logout()" title="Sign out">
+        <div class="uc-av" id="s-av">M</div>
+        <div style="flex:1;min-width:0">
+          <div class="uc-name" id="s-name">Staff</div>
+          <div class="uc-role" id="s-role">Manager</div>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </div>
+    </div>
+  </nav>
+
+  <div class="smain">
+
+    <!-- DASHBOARD -->
+    <div class="spage on" id="sp-dashboard">
+      <div class="sbar"><div class="sbar-l"><h2>Dashboard</h2><p>Library overview at a glance</p></div>
+        <div class="sbar-r"><button class="btn btn-ghost" onclick="loadDash()">↻ Refresh</button></div>
+      </div>
+      <div class="sc">
+        <div class="sg">
+          <div class="scard"><div class="sc-lbl"><span>📚</span>Total Books</div><div class="sc-val" id="s-books">—</div></div>
+          <div class="scard"><div class="sc-lbl"><span>✅</span>Available Copies</div><div class="sc-val" id="s-avail">—</div></div>
+          <div class="scard"><div class="sc-lbl"><span>👥</span>Active Members</div><div class="sc-val" id="s-members">—</div></div>
+          <div class="scard"><div class="sc-lbl"><span>🔄</span>Active Borrows</div><div class="sc-val" id="s-borrows">—</div></div>
+          <div class="scard"><div class="sc-lbl"><span>⚠️</span>Overdue</div><div class="sc-val" id="s-overdue">—</div></div>
+          <div class="scard"><div class="sc-lbl"><span>💰</span>Pending Fines ₹</div><div class="sc-val" id="s-fines">—</div></div>
+        </div>
+        <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:14px;letter-spacing:-.2px">Quick Actions</div>
+        <div class="qa-grid">
+          <div class="qa" onclick="showSP('issue',qaSel('issue'))"><span class="qa-ico">➕</span><div><div class="qa-ttl">Issue Book</div><div class="qa-sub">Lend to a member</div></div></div>
+          <div class="qa" onclick="showSP('return',qaSel('return'))"><span class="qa-ico">↩️</span><div><div class="qa-ttl">Return Book</div><div class="qa-sub">Process return</div></div></div>
+          <div class="qa" onclick="showSP('overdue',qaSel('overdue'))"><span class="qa-ico">⚠️</span><div><div class="qa-ttl">View Overdue</div><div class="qa-sub">Chase up returns</div></div></div>
+          <div class="qa" onclick="showSP('fines',qaSel('fines'))"><span class="qa-ico">💰</span><div><div class="qa-ttl">Manage Fines</div><div class="qa-sub">Paid &amp; pending</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div class="spage" id="sp-books">
+      <div class="sbar"><div class="sbar-l"><h2>Book Catalog</h2><p>All books with availability</p></div>
+        <div class="sbar-r">
+          <div class="dsearch"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="bk-q" placeholder="Search title or author…" oninput="renderBks()"/></div>
+        </div>
+      </div>
+      <div style="padding:0 0">
+        <div class="ftabs" id="cat-tabs"></div>
+      </div>
+      <div class="books-grid" id="bk-grid"></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="spage" id="sp-members">
+      <div class="sbar"><div class="sbar-l"><h2>Members</h2><p>Registered library members</p></div></div>
+      <div class="ftabs">
+        <button class="ft on" onclick="setMF('ALL',this)">All</button>
+        <button class="ft" onclick="setMF('Student',this)">Student</button>
+        <button class="ft" onclick="setMF('Faculty',this)">Faculty</button>
+        <button class="ft" onclick="setMF('Public',this)">Public</button>
+        <button class="ft" onclick="setMF('Active',this)">Active</button>
+        <button class="ft" onclick="setMF('Inactive',this)">Inactive</button>
+      </div>
+      <div class="mgrid" id="m-grid"></div>
+    </div>
+
+    <!-- ACTIVE BORROWS -->
+    <div class="spage" id="sp-borrows">
+      <div class="sbar"><div class="sbar-l"><h2>Active Borrows</h2><p>Currently borrowed &amp; overdue books</p></div></div>
+      <div style="padding:0">
+        <div class="dc" style="border-radius:0;border:none;margin:0"><div class="dtw">
+          <table><thead><tr><th>ID</th><th>Member</th><th>Type</th><th>Book</th><th>Borrowed</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody id="borrow-tb"><tr><td colspan="7"><div class="empty"><div class="empty-ico">🔄</div>Loading…</div></td></tr></tbody></table>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ISSUE -->
+    <div class="spage" id="sp-issue">
+      <div class="sbar"><div class="sbar-l"><h2>Issue Book</h2><p>14-day loan period</p></div></div>
+      <div class="sc">
+        <div class="dc"><div class="dc-hd"><h3>New Transaction</h3></div>
+          <div class="dform">
+            <div class="fg-grid">
+              <div class="fg"><label>Member</label><select id="iss-m"><option value="">Select member…</option></select></div>
+              <div class="fg"><label>Book</label><select id="iss-b"><option value="">Select book…</option></select></div>
+              <div class="fg"><label>Processed By</label>
+                <select id="iss-s">
+                  <option value="1">Meera Nair (Manager)</option>
+                  <option value="2">Rajan Sharma (Librarian)</option>
+                  <option value="3">Priya Menon (Librarian)</option>
+                  <option value="4">Arjun Das (Assistant)</option>
+                  <option value="5">Sneha Pillai (Assistant)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="dform-foot"><button class="btn btn-solid" onclick="issueBook()">➕ Issue Book</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETURN -->
+    <div class="spage" id="sp-return">
+      <div class="sbar"><div class="sbar-l"><h2>Return Book</h2><p>Fine ₹10 per overdue day</p></div></div>
+      <div class="sc">
+        <div class="dc"><div class="dc-hd"><h3>Process Return</h3></div>
+          <div class="dform">
+            <div class="fg-grid">
+              <div class="fg"><label>Transaction</label><select id="ret-tx"><option value="">Select active borrow…</option></select></div>
+            </div>
+          </div>
+          <div class="dform-foot"><button class="btn btn-green" onclick="returnBook()">↩️ Return Book</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINES -->
+    <div class="spage" id="sp-fines">
+      <div class="sbar"><div class="sbar-l"><h2>Fines</h2><p>Overdue fines — paid &amp; pending</p></div></div>
+      <div style="padding:0">
+        <div class="dc" style="border-radius:0;border:none;margin:0"><div class="dtw">
+          <table><thead><tr><th>Member</th><th>Book</th><th>Due Date</th><th>Amount</th><th>Reason</th><th>Status</th></tr></thead>
+          <tbody id="fines-tb"><tr><td colspan="6"><div class="empty"><div class="empty-ico">💰</div>Loading…</div></td></tr></tbody></table>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- OVERDUE -->
+    <div class="spage" id="sp-overdue">
+      <div class="sbar"><div class="sbar-l"><h2>Overdue Books</h2><p>Past their due date</p></div></div>
+      <div style="padding:0">
+        <div class="dc" style="border-radius:0;border:none;margin:0"><div class="dtw">
+          <table><thead><tr><th>Member</th><th>Email</th><th>Book</th><th>Due Date</th><th>Fine</th><th>Paid</th></tr></thead>
+          <tbody id="ov-tb"><tr><td colspan="6"><div class="empty"><div class="empty-ico">⚠️</div>Loading…</div></td></tr></tbody></table>
+        </div></div>
+      </div>
+    </div>
+
+  </div><!-- .smain -->
+</div><!-- #staff-app -->
+
+<!-- ════════════════ MEMBER PORTAL ════════════════ -->
+<div id="member-app">
+  <div class="m-topbar">
+    <div><h2 id="m-title">My Library</h2><p id="m-sub">Your borrowed books</p></div>
+    <div class="m-tbar-acts">
+      <div class="ibtn" onclick="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="m-pages">
+
+    <!-- MY LIBRARY -->
+    <div class="mpage on" id="mp-library">
+      <div class="mftabs">
+        <button class="mft on" onclick="setBF('ALL',this)">All</button>
+        <button class="mft" onclick="setBF('Borrowed',this)">Active</button>
+        <button class="mft" onclick="setBF('Overdue',this)">Overdue</button>
+        <button class="mft" onclick="setBF('Returned',this)">Returned</button>
+      </div>
+      <div style="padding-top:4px" id="m-borrows"></div>
+    </div>
+
+    <!-- MY FINES -->
+    <div class="mpage" id="mp-fines">
+      <div style="padding:14px 14px 6px;font-size:13px;color:var(--t2)">Your outstanding and paid fines</div>
+      <div id="m-fines"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="mpage" id="mp-profile">
+      <div class="pcard">
+        <div class="pcard-av" id="m-av"></div>
+        <div class="pcard-name" id="m-name"></div>
+        <div class="pcard-email" id="m-email"></div>
+        <div class="pcard-badge" id="m-badge"></div>
+        <div class="pcard-grid">
+          <div><div class="pg-lbl">Member ID</div><div class="pg-val" id="m-id"></div></div>
+          <div><div class="pg-lbl">Membership</div><div class="pg-val" id="m-type"></div></div>
+          <div><div class="pg-lbl">Joined</div><div class="pg-val" id="m-joined"></div></div>
+          <div><div class="pg-lbl">Expires</div><div class="pg-val" id="m-expires"></div></div>
+          <div><div class="pg-lbl">Phone</div><div class="pg-val" id="m-phone"></div></div>
+          <div><div class="pg-lbl">Address</div><div class="pg-val" id="m-addr"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .m-pages -->
+
+  <nav class="bot-nav">
+    <div class="bni on" onclick="showMP('library',this,'My Library','Your borrowed books')">
+      <span class="bni-ico">📚</span>Library
+    </div>
+    <div class="bni" onclick="showMP('fines',this,'My Fines','Outstanding &amp; paid fines')">
+      <span class="bni-ico">💰</span>Fines
+    </div>
+    <div class="bni" onclick="showMP('profile',this,'My Profile','Account information')">
+      <span class="bni-ico">👤</span>Profile
+    </div>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:3000/api';
+
+/* ── color helpers ── */
+const AVCOLORS = ['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#06B6D4','#F97316','#6366F1','#14B8A6','#EF4444'];
+const THEMES = {
+  'Computer Science': 'linear-gradient(145deg,#0d1117 0%,#1f4068 100%)',
+  'Database Systems': 'linear-gradient(145deg,#0D0D20 0%,#2D1B69 100%)',
+  'Networks':         'linear-gradient(145deg,#0A0F1A 0%,#0E2D4E 100%)',
+  'Mathematics':      'linear-gradient(145deg,#1A1500 0%,#3D2E00 100%)',
+  'Fiction':          'linear-gradient(145deg,#1A0028 0%,#4B1D75 100%)',
+  'Science':          'linear-gradient(145deg,#001428 0%,#0E4D3A 100%)',
+  'History':          'linear-gradient(145deg,#1A0A00 0%,#7C2D12 100%)',
+  'Self Help':        'linear-gradient(145deg,#001A0A 0%,#064E3B 100%)',
+};
+
+/* state */
+let role = 'staff', currentUser = null;
+let allBooks = [], allMems = [], myBorrows = [], myFines = [];
+let catF = 'ALL', memF = 'ALL', borF = 'ALL';
+
+/* ── toast ── */
+let _tt;
+function toast(msg, type='s'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`show ${type}`;
+  clearTimeout(_tt); _tt=setTimeout(()=>t.className='',3500);
+}
+
+/* ── login ── */
+function setRole(r,btn){
+  role=r;
+  document.querySelectorAll('.lrole-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleEye(){
+  const i=document.getElementById('l-pwd');
+  i.type=i.type==='password'?'text':'password';
+}
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pwd  =document.getElementById('l-pwd').value;
+  if(!email||!pwd){toast('Please enter email and password','e');return}
+
+  const btn=document.getElementById('l-btn');
+  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+
+  try{
+    if(role==='staff'){
+      // any email+password — derive name from email prefix
+      const name = email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+      currentUser={type:'staff',name,email,av:name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),role:'Staff'};
+      openStaff();
+    } else {
+      // try fetching member by email; gracefully fall back
+      try{
+        const data=await fetch(`${API}/member/login?email=${encodeURIComponent(email)}`).then(r=>r.json());
+        if(!data.error){
+          currentUser={type:'member',...data};
+        } else {
+          // fallback: create a generic member session
+          currentUser={type:'member',member_id:0,first_name:email.split('@')[0],last_name:'',email,membership_type:'Guest',join_date:'',expiry_date:'',phone:'',address:''};
+        }
+      } catch {
+        currentUser={type:'member',member_id:0,first_name:email.split('@')[0],last_name:'',email,membership_type:'Guest',join_date:'',expiry_date:'',phone:'',address:''};
+      }
+      openMember();
+    }
+  } catch(e){
+    toast('Cannot connect to server','e');
+  } finally {
+    btn.innerHTML='Login';btn.disabled=false;
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doLogin();
+});
+
+function logout(){
+  document.getElementById('staff-app').style.display='none';
+  document.getElementById('member-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  currentUser=null;
+}
+
+/* ── open apps ── */
+function openStaff(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('staff-app').style.display='block';
+  document.getElementById('s-av').textContent=currentUser.av;
+  document.getElementById('s-name').textContent=currentUser.name;
+  document.getElementById('s-role').textContent=currentUser.role;
+  loadDash();
+}
+
+function openMember(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('member-app').style.display='flex';
+  fillProfile();
+  if(currentUser.member_id) loadMyBorrows();
+  if(currentUser.member_id) loadMyFines();
+}
+
+/* ── staff nav ── */
+const LOADERS={dashboard:loadDash,books:loadBooks,members:loadMems,borrows:loadBorrows,issue:loadIssueForm,return:loadReturnForm,fines:loadFines,overdue:loadOverdue};
+
+function showSP(name,el){
+  document.querySelectorAll('.spage').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('sp-'+name).classList.add('on');
+  if(el)el.classList.add('on');
+  LOADERS[name]?.();
+}
+
+function qaSel(name){
+  return document.querySelector(`.ni[onclick*="${name}"]`);
+}
+
+/* ── animated counter ── */
+function animCount(el,target,dur=900){
+  if(!target&&target!==0){el.textContent='0';return}
+  const t0=performance.now();
+  (function tick(now){
+    const p=Math.min((now-t0)/dur,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*e);
+    if(p<1)requestAnimationFrame(tick);
+  })(performance.now());
+}
+
+/* ── dashboard ── */
+async function loadDash(){
+  try{
+    const d=await fetch(API+'/stats').then(r=>r.json());
+    animCount(document.getElementById('s-books'),   d.total_books   ||0);
+    animCount(document.getElementById('s-avail'),   d.available_books||0);
+    animCount(document.getElementById('s-members'), d.active_members ||0);
+    animCount(document.getElementById('s-borrows'), d.active_borrows ||0);
+    animCount(document.getElementById('s-overdue'), d.overdue_count  ||0);
+    animCount(document.getElementById('s-fines'),   d.pending_fines  ||0);
+  }catch{toast('Server unreachable','e')}
+}
+
+/* ── books ── */
+async function loadBooks(){
+  const g=document.getElementById('bk-grid');
+  g.innerHTML=Array(8).fill(`<div class="bk" style="animation:none"><div class="bk-cov"><div class="skel" style="width:100%;height:100%"></div></div><div class="bk-info"><div class="skel" style="height:11px;width:75%;margin-bottom:8px"></div><div class="skel" style="height:10px;width:55%"></div></div></div>`).join('');
+  allBooks=await fetch(API+'/books').then(r=>r.json());
+  buildCatTabs();
+  renderBks();
+}
+
+function buildCatTabs(){
+  const cats=[...new Set(allBooks.map(b=>b.category))].sort();
+  document.getElementById('cat-tabs').innerHTML=
+    `<button class="ft on" onclick="setCF('ALL',this)">All (${allBooks.length})</button>`+
+    cats.map(c=>`<button class="ft" onclick="setCF('${c}',this)">${c}</button>`).join('');
+}
+
+function setCF(c,el){
+  catF=c;
+  document.querySelectorAll('#cat-tabs .ft').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderBks();
+}
+
+function renderBks(){
+  const q=(document.getElementById('bk-q')?.value||'').toLowerCase();
+  const list=allBooks.filter(b=>{
+    const mc=catF==='ALL'||b.category===catF;
+    const mq=!q||b.title.toLowerCase().includes(q)||(b.authors||'').toLowerCase().includes(q);
+    return mc&&mq;
+  });
+  const g=document.getElementById('bk-grid');
+  if(!list.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">📖</div>No books found<p>Try a different search</p></div>';return}
+  g.innerHTML=list.map((b,i)=>{
+    const bg=THEMES[b.category]||'linear-gradient(145deg,#1A1A1A,#2A2A2A)';
+    const av=b.available_copies>0?`<div class="bk-avail ok">${b.available_copies}/${b.total_copies}</div>`:`<div class="bk-avail out">0/${b.total_copies}</div>`;
+    return `<div class="bk" style="animation-delay:${i*.04}s">
+      <div class="bk-cov" style="background:${bg}">
+        <div class="bk-cov-letter">${b.title[0].toUpperCase()}</div>${av}
+      </div>
+      <div class="bk-info">
+        <div class="bk-title">${b.title}</div>
+        <div class="bk-author">${b.authors||'—'}</div>
+        <div class="bk-cat">${b.category}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── members ── */
+async function loadMems(){
+  const g=document.getElementById('m-grid');
+  g.innerHTML=Array(6).fill(`<div class="mc" style="animation:none"><div style="display:flex;gap:10px;margin-bottom:12px"><div class="skel" style="width:42px;height:42px;border-radius:50%;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:12px;width:65%;margin-bottom:7px"></div><div class="skel" style="height:10px;width:48%"></div></div></div></div>`).join('');
+  allMems=await fetch(API+'/members').then(r=>r.json());
+  renderMems();
+}
+
+function setMF(f,el){
+  memF=f;
+  document.querySelectorAll('#sp-members .ft').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderMems();
+}
+
+function renderMems(){
+  const list=allMems.filter(m=>{
+    if(memF==='ALL')return true;
+    if(memF==='Active')return m.is_active;
+    if(memF==='Inactive')return!m.is_active;
+    return m.membership_type===memF;
+  });
+  const g=document.getElementById('m-grid');
+  if(!list.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">👥</div>No members found</div>';return}
+  g.innerHTML=list.map((m,i)=>{
+    const c=AVCOLORS[m.member_id%AVCOLORS.length];
+    const init=`${m.first_name[0]}${m.last_name[0]}`;
+    const tc={Student:'bb',Faculty:'bt',Public:'bp'}[m.membership_type]||'bb';
+    return `<div class="mc" style="animation-delay:${i*.04}s">
+      <div class="mc-av" style="background:${c}20;color:${c}">${init}</div>
+      <div class="mc-name">${m.first_name} ${m.last_name}</div>
+      <div class="mc-email">${m.email}</div>
+      <div class="mc-row">
+        <span class="badge ${tc}">${m.membership_type}</span>
+        <span class="badge ${m.is_active?'bg':'br'}">${m.is_active?'Active':'Inactive'}</span>
+      </div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between">
+        <span style="font-size:11px;color:var(--t2)">${m.total_borrows} borrows</span>
+        <span style="font-size:11px;color:var(--t2)">${m.active_borrows} active</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── borrows table ── */
+async function loadBorrows(){
+  const data=await fetch(API+'/borrows/active').then(r=>r.json());
+  const tb=document.getElementById('borrow-tb');
+  if(!data.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-ico">✅</div>No active borrows</div></td></tr>';return}
+  tb.innerHTML=data.map(b=>`<tr>
+    <td class="tm td">#${b.transaction_id}</td>
+    <td class="tb">${b.member_name}</td>
+    <td><span class="badge bt">${b.membership_type}</span></td>
+    <td>${b.book_title}</td>
+    <td class="td">${b.borrow_date?.split('T')[0]}</td>
+    <td class="td">${b.due_date?.split('T')[0]}</td>
+    <td><span class="badge ${b.status==='Overdue'?'br':'ba'}">${b.status}</span></td>
+  </tr>`).join('');
+}
+
+/* ── issue form ── */
+async function loadIssueForm(){
+  const[mems,books]=await Promise.all([fetch(API+'/members').then(r=>r.json()),fetch(API+'/books').then(r=>r.json())]);
+  document.getElementById('iss-m').innerHTML='<option value="">Select member…</option>'+mems.filter(m=>m.is_active).map(m=>`<option value="${m.member_id}">${m.first_name} ${m.last_name} (${m.membership_type})</option>`).join('');
+  document.getElementById('iss-b').innerHTML='<option value="">Select book…</option>'+books.filter(b=>b.available_copies>0).map(b=>`<option value="${b.book_id}">${b.title} [${b.available_copies} left]</option>`).join('');
+}
+
+async function issueBook(){
+  const mid=document.getElementById('iss-m').value;
+  const bid=document.getElementById('iss-b').value;
+  const sid=document.getElementById('iss-s').value;
+  if(!mid||!bid){toast('Select member and book','e');return}
+  const res=await fetch(API+'/borrow',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({member_id:mid,book_id:bid,staff_id:sid})}).then(r=>r.json());
+  res.success?(toast(`Issued! Due: ${res.due_date}`),loadIssueForm()):toast(res.error,'e');
+}
+
+/* ── return form ── */
+async function loadReturnForm(){
+  const data=await fetch(API+'/borrows/active').then(r=>r.json());
+  document.getElementById('ret-tx').innerHTML='<option value="">Select active borrow…</option>'+data.map(b=>`<option value="${b.transaction_id}">#${b.transaction_id} — ${b.member_name} → ${b.book_title}</option>`).join('');
+}
+
+async function returnBook(){
+  const tid=document.getElementById('ret-tx').value;
+  if(!tid){toast('Select a transaction','e');return}
+  const res=await fetch(`${API}/return/${tid}`,{method:'POST'}).then(r=>r.json());
+  if(res.success){toast(res.fine>0?`Fine ₹${res.fine} generated`:'Returned on time!',res.fine>0?'e':'s');loadReturnForm();}
+  else toast(res.error,'e');
+}
+
+/* ── fines table ── */
+async function loadFines(){
+  const data=await fetch(API+'/fines').then(r=>r.json());
+  const tb=document.getElementById('fines-tb');
+  if(!data.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-ico">💰</div>No fines</div></td></tr>';return}
+  tb.innerHTML=data.map(f=>`<tr>
+    <td class="tb">${f.member_name}</td>
+    <td>${f.book_title}</td>
+    <td class="td">${f.due_date?.split('T')[0]}</td>
+    <td><strong>₹${f.amount}</strong></td>
+    <td class="td">${f.reason}</td>
+    <td><span class="badge ${f.paid?'bg':'br'}">${f.paid?'Paid':'Pending'}</span></td>
+  </tr>`).join('');
+}
+
+/* ── overdue table ── */
+async function loadOverdue(){
+  const data=await fetch(API+'/borrows/overdue').then(r=>r.json());
+  const tb=document.getElementById('ov-tb');
+  if(!data.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-ico">🎉</div>No overdue books!<p>All returned on time</p></div></td></tr>';return}
+  tb.innerHTML=data.map(o=>`<tr>
+    <td class="tb">${o.member_name}</td>
+    <td class="td">${o.email}</td>
+    <td>${o.title}</td>
+    <td class="td">${o.due_date?.split('T')[0]}</td>
+    <td>${o.fine_amount?'₹'+o.fine_amount:'—'}</td>
+    <td><span class="badge ${o.paid?'bg':'br'}">${o.paid?'Paid':'Pending'}</span></td>
+  </tr>`).join('');
+}
+
+/* ── member portal ── */
+function showMP(name,el,title,sub){
+  document.querySelectorAll('.mpage').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('mp-'+name).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-sub').textContent=sub;
+}
+
+function fillProfile(){
+  const m=currentUser;
+  const c=AVCOLORS[(m.member_id||1)%AVCOLORS.length];
+  const init=`${(m.first_name||'?')[0]}${(m.last_name||'')[0]||''}`.toUpperCase();
+  const av=document.getElementById('m-av');
+  av.style.background=c+'20';av.style.color=c;av.textContent=init;
+  document.getElementById('m-name').textContent=`${m.first_name} ${m.last_name}`.trim();
+  document.getElementById('m-email').textContent=m.email;
+  const tc={Student:'bb',Faculty:'bt',Public:'bp',Guest:'ba'}[m.membership_type]||'ba';
+  document.getElementById('m-badge').innerHTML=`<span class="badge ${tc}">${m.membership_type}</span>`;
+  document.getElementById('m-id').textContent=m.member_id?`#${m.member_id}`:'—';
+  document.getElementById('m-type').textContent=m.membership_type||'—';
+  document.getElementById('m-joined').textContent=m.join_date?.split('T')[0]||'—';
+  document.getElementById('m-expires').textContent=m.expiry_date?.split('T')[0]||'—';
+  document.getElementById('m-phone').textContent=m.phone||'—';
+  document.getElementById('m-addr').textContent=m.address||'—';
+}
+
+async function loadMyBorrows(){
+  const data=await fetch(`${API}/members/${currentUser.member_id}/borrows`).then(r=>r.json()).catch(()=>[]);
+  myBorrows=data;renderMyBorrows();
+}
+
+function setBF(f,el){
+  borF=f;
+  document.querySelectorAll('.mftabs .mft').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderMyBorrows();
+}
+
+function renderMyBorrows(){
+  const list=borF==='ALL'?myBorrows:myBorrows.filter(b=>b.status===borF);
+  const el=document.getElementById('m-borrows');
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">📚</div>Nothing here<p>No books in this category</p></div>';return;
+  }
+  el.innerHTML=list.map((b,i)=>{
+    const bg=THEMES[b.category]||'linear-gradient(145deg,#1A1A1A,#333)';
+    const sc=b.status==='Overdue'?'br':b.status==='Returned'?'bg':'ba';
+    return `<div class="brow-card" style="animation-delay:${i*.05}s">
+      <div class="brow-cov" style="background:${bg}">
+        <span style="font-size:22px;font-weight:900;color:rgba(255,255,255,.18);font-family:'JetBrains Mono',monospace">${b.book_title[0]}</span>
+      </div>
+      <div class="brow-info">
+        <div class="brow-title">${b.book_title}</div>
+        <div class="brow-cat">${b.category}</div>
+        <div style="margin-bottom:8px"><span class="badge ${sc}">${b.status}</span></div>
+        <div class="brow-dates">📅 Borrowed: ${b.borrow_date?.split('T')[0]}<br/>⏰ Due: ${b.due_date?.split('T')[0]}${b.return_date?`<br/>✅ Returned: ${b.return_date?.split('T')[0]}`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadMyFines(){
+  const data=await fetch(`${API}/members/${currentUser.member_id}/fines`).then(r=>r.json()).catch(()=>[]);
+  myFines=data;
+  const el=document.getElementById('m-fines');
+  if(!data.length){el.innerHTML='<div class="empty"><div class="empty-ico">🎉</div>No fines!<p>You have no outstanding fines</p></div>';return}
+  el.innerHTML=data.map((f,i)=>`
+    <div class="fine-card" style="animation-delay:${i*.06}s;border-left:3px solid ${f.paid?'var(--G)':'var(--A)'}">
+      <div class="fine-amt">₹${f.amount}</div>
+      <div class="fine-book">${f.book_title}</div>
+      <div class="fine-rsn">${f.reason}</div>
+      <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--t2)">Due: ${f.due_date?.split('T')[0]}</span>
+        <span class="badge ${f.paid?'bg':'ba'}">${f.paid?'Paid':'Pending'}</span>
+      </div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
